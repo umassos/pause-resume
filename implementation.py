@@ -51,6 +51,42 @@ def rodCuttingKmin(vals, k, beta):
     
     return sol, minCost
 
+# list of costs (values)    -- vals
+# length of job             -- k
+# switching cost            -- beta
+def oneMinOnline(vals, k, U, L, beta):
+    prevAccepted = False
+    accepted = []
+    lastElem = len(vals)
+    cost = 0
+
+    threshold = math.sqrt(U*L)
+
+    #simulate behavior of online algorithm using a for loop
+    for (i, val) in enumerate(vals):
+        if len(accepted) == k:
+            break
+        if len(accepted) + (len(vals)-i) == k: # must accept all remaining elements
+            lastElem = i
+            break
+        accept = (val <= threshold)
+        if prevAccepted != accept:
+            cost += beta
+        if accept:
+            accepted.append(val)
+            cost += val
+        prevAccepted = accept
+
+    if len(accepted) < k:
+        if prevAccepted != True:
+            cost += 2*beta
+        for i in range(lastElem, len(vals)):
+            accepted.append(vals[i])
+            cost += vals[i]
+
+    return accepted, cost
+
+
 
 if __name__ == '__main__':
     #main()
@@ -59,6 +95,10 @@ if __name__ == '__main__':
     print(arr)
     print(cost)
 
-    sol, cost = rodCuttingKmin(vals, 8, 10)
+    sol, cost = rodCuttingKmin(vals, 8, beta=10)
     print(sol)
+    print(cost)
+
+    accepted, cost = oneMinOnline(vals, 8, 10, 1, beta=10)
+    print(accepted)
     print(cost)
