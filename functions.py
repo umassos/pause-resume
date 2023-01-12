@@ -1,9 +1,23 @@
-# algorithm implementations for online search with switching penalty
-# January 2023
-
 import random
 import math
 from sympy import symbols, solve
+import numpy as np
+import pandas as pd
+
+def randomInterval(df, T):
+    randInd = random.randrange(len(df)-T)
+
+    int = df[randInd:randInd+T]
+    display(int)
+    print(len(int))
+
+    int['carbon_intensity_avg'].values.tolist()
+
+
+def boundedValues(df):
+    L = df["carbon_intensity_avg"].min()
+    U = df["carbon_intensity_avg"].max()
+    return L, U
 
 # list of values            -- vals
 # length of subsequence     -- k
@@ -40,7 +54,7 @@ def dynProgOPT(vals, k, beta):
         # subtract subseq from vals
         del newVals[indices[0]:indices[1]]
 
-        otherSeq, otherSum = rodCuttingKmin(newVals, k-i, beta)
+        otherSeq, otherSum = dynProgOPT(newVals, k-i, beta)
         curCost = sum(subseq) + otherSum + 2*beta
 
         if curCost < minCost:
@@ -57,7 +71,9 @@ def dynProgOPT(vals, k, beta):
 # switching cost            -- beta
 def oneMinOnline(vals, k, U, L, beta):
     prevAccepted = False
-    accepted = []
+    sol = []
+    accepted = 0
+    runningList = []
     lastElem = len(vals)
     cost = 0
 
@@ -65,27 +81,34 @@ def oneMinOnline(vals, k, U, L, beta):
 
     #simulate behavior of online algorithm using a for loop
     for (i, val) in enumerate(vals):
-        if len(accepted) == k:
-            break
-        if len(accepted) + (len(vals)-i) == k: # must accept all remaining elements
+        if accepted + (len(vals)-i) == k: # must accept all remaining elements
             lastElem = i
             break
         accept = (val <= threshold)
         if prevAccepted != accept:
+            if len(runningList) > 1:
+                sol.append(runningList)
+            runningList = []
             cost += beta
         if accept:
-            accepted.append(val)
+            runningList.append(val)
+            accepted += 1
             cost += val
+            if accepted == k:
+                sol.append(runningList)
+                cost += beta # one last switching cost to turn off
+                break
         prevAccepted = accept
 
-    if len(accepted) < k:
+    if accepted < k:
         if prevAccepted != accept:
             cost += 2*beta
         for i in range(lastElem, len(vals)):
-            accepted.append(vals[i])
+            runningList.append(vals[i])
             cost += vals[i]
+        sol.append(runningList)
 
-    return accepted, cost
+    return sol, cost
 
 
 # list of costs (values)    -- vals
@@ -105,61 +128,61 @@ def kMinOnline(vals, k, U, L, beta):
     thres = iter(thresholds)
 
     prevAccepted = False
-    accepted = []
+    sol = []
+    accepted = 0
+    runningList = []
     lastElem = len(vals)
     cost = 0
 
     threshold = next(thres)
-    print(threshold)
 
     #simulate behavior of online algorithm using a for loop
     for (i, val) in enumerate(vals):
-        if len(accepted) == k:
-            break
-        if len(accepted) + (len(vals)-i) == k: # must accept all remaining elements
+        if accepted + (len(vals)-i) == k: # must accept all remaining elements
             lastElem = i
             break
         accept = (val <= threshold)
         if prevAccepted != accept:
+            if len(runningList) > 1:
+                sol.append(runningList)
+            runningList = []
             cost += beta
         if accept:
-            accepted.append(val)
+            runningList.append(val)
+            accepted += 1
             cost += val
+            if accepted == k:
+                sol.append(runningList)
+                cost += beta # one last switching cost to turn off
+                break
             threshold = next(thres)
-            print(threshold)
         prevAccepted = accept
 
-    if len(accepted) < k:
+    if accepted < k:
         if prevAccepted != accept:
             cost += 2*beta
         for i in range(lastElem, len(vals)):
-            accepted.append(vals[i])
+            runningList.append(vals[i])
             cost += vals[i]
+        sol.append(runningList)
 
-    return accepted, cost
+    return sol, cost
 
+def generateSyntheticSequence(start, end, interval, noiseFactor=0):
+    def cosine(x):
+        return (5.1 + 5 * math.cos(x/3.8))
+    
+    sequence = []
 
+    cur = start
+    while (cur < end):
+        sequence.append(cosine(cur))
+        cur += interval
 
-if __name__ == '__main__':
-    #main()
-    k = 8
-    U = 10
-    L = 1
-    switchCost = 10
+    noise = np.random.normal(0,noiseFactor,len(sequence))
 
-    vals = [1,2,3,4,5,6,7,8,9,1,2,3,4,5,6,7,8,9]
-    arr, cost = smallestSubsequenceK(vals, 4)
-    print(arr)
-    print(cost)
+    sequence = np.array(sequence) + noise
 
-    sol, cost = dynProgOPT(vals, k, beta=switchCost)
-    print(sol)
-    print(cost)
-
-    accepted, cost = oneMinOnline(vals, k, U, L, beta=switchCost)
-    print(accepted)
-    print(cost)
-
-    accepted, cost = kMinOnline(vals, k, U, L, beta=switchCost)
-    print(accepted)
-    print(cost)
+    sequence[sequence<0] = 0
+    
+    return sequence.tolist()
