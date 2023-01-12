@@ -3,6 +3,7 @@
 
 import random
 import math
+from sympy import symbols, solve
 
 # list of values            -- vals
 # length of subsequence     -- k
@@ -25,7 +26,7 @@ def smallestSubsequenceK(vals, k):
 # list of costs (values)    -- vals
 # length of job             -- k
 # switching cost            -- beta
-def rodCuttingKmin(vals, k, beta):
+def dynProgOPT(vals, k, beta):
     minCost = math.inf
     sol = []
     # n = len(vals)
@@ -78,7 +79,58 @@ def oneMinOnline(vals, k, U, L, beta):
         prevAccepted = accept
 
     if len(accepted) < k:
-        if prevAccepted != True:
+        if prevAccepted != accept:
+            cost += 2*beta
+        for i in range(lastElem, len(vals)):
+            accepted.append(vals[i])
+            cost += vals[i]
+
+    return accepted, cost
+
+
+# list of costs (values)    -- vals
+# length of job             -- k
+# switching cost            -- beta
+def kMinOnline(vals, k, U, L, beta):
+
+    # solve for alpha
+    a = symbols('a', real=True, positive=True)
+    expr = (1 - L/U)/(1 - 1/a) - (1 + 1/(k*a))**k
+    sol = solve(expr)
+    if len(sol) < 1:
+        print("something went wrong here")
+    alpha = sol[0]
+
+    thresholds = [ U*(1 - (1 - (1/alpha)) * (1 + (1/(alpha*k)))**(i-1) ) for i in range(1, k+1)]
+    thres = iter(thresholds)
+
+    prevAccepted = False
+    accepted = []
+    lastElem = len(vals)
+    cost = 0
+
+    threshold = next(thres)
+    print(threshold)
+
+    #simulate behavior of online algorithm using a for loop
+    for (i, val) in enumerate(vals):
+        if len(accepted) == k:
+            break
+        if len(accepted) + (len(vals)-i) == k: # must accept all remaining elements
+            lastElem = i
+            break
+        accept = (val <= threshold)
+        if prevAccepted != accept:
+            cost += beta
+        if accept:
+            accepted.append(val)
+            cost += val
+            threshold = next(thres)
+            print(threshold)
+        prevAccepted = accept
+
+    if len(accepted) < k:
+        if prevAccepted != accept:
             cost += 2*beta
         for i in range(lastElem, len(vals)):
             accepted.append(vals[i])
@@ -90,15 +142,24 @@ def oneMinOnline(vals, k, U, L, beta):
 
 if __name__ == '__main__':
     #main()
+    k = 8
+    U = 10
+    L = 1
+    switchCost = 10
+
     vals = [1,2,3,4,5,6,7,8,9,1,2,3,4,5,6,7,8,9]
     arr, cost = smallestSubsequenceK(vals, 4)
     print(arr)
     print(cost)
 
-    sol, cost = rodCuttingKmin(vals, 8, beta=10)
+    sol, cost = dynProgOPT(vals, k, beta=switchCost)
     print(sol)
     print(cost)
 
-    accepted, cost = oneMinOnline(vals, 8, 10, 1, beta=10)
+    accepted, cost = oneMinOnline(vals, k, U, L, beta=switchCost)
+    print(accepted)
+    print(cost)
+
+    accepted, cost = kMinOnline(vals, k, U, L, beta=switchCost)
     print(accepted)
     print(cost)
