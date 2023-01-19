@@ -13,7 +13,7 @@ Our experimental code has been written in Python3.  We recommend using a tool to
 
 1. **functions.py**: Implements helper functions and algorithms.
 2. **experiments.py**: Main Python script for all experiments.
-3. **alpha*.pickle**: Caches a dictionary of precomputed alpha values for k-min search algorithm and online pause and resume algorithm
+3. **alpha\*.pickle**: Caches a dictionary of precomputed alpha values for k-min search algorithm and online pause and resume algorithm
 4. **carbon-traces/**: directory, contains carbon traces in .csv format.
     - "CA": "CA-ON.csv" (Ontario, Canada)
     - "NZ": "NZ-NZN.csv" (New Zealand)
