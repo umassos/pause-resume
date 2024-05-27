@@ -1,4 +1,8 @@
-# Pause & Resume Experiments
+# The Online Pause and Resume Problem: Optimal Algorithms and An Application to Carbon-Aware Load Shifting
+
+[<img src="https://img.shields.io/badge/Full%20Paper-2303.17551-B31B1B.svg?style=flat-square&logo=arxiv" height="25">](https://arxiv.org/abs/2303.17551)
+
+We introduce and study the online pause and resume problem. In this problem, a player attempts to find the $k$ lowest (alternatively, highest) prices in a sequence of fixed length $T$, which is revealed sequentially. At each time step, the player is presented with a price and decides whether to accept or reject it. The player incurs a switching cost whenever their decision changes in consecutive time steps, i.e., whenever they pause or resume purchasing. This online problem is motivated by the goal of carbon-aware load shifting, where a workload may be paused during periods of high carbon intensity and resumed during periods of low carbon intensity and incurs a cost when saving or restoring its state. It has strong connections to existing problems studied in the literature on online optimization, though it introduces unique technical challenges that prevent the direct application of existing algorithms. Extending prior work on threshold-based algorithms, we introduce double-threshold algorithms for both the minimization and maximization variants of this problem. We further show that the competitive ratios achieved by these algorithms are the best achievable by any deterministic online algorithm. Finally, we empirically validate our proposed algorithm through case studies on the application of carbon-aware load shifting using real carbon trace data and existing baseline algorithms.
 
 # Python code 
 
