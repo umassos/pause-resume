@@ -25,7 +25,7 @@ Our experimental code has been written in Python3.  We recommend using a tool to
 
 # Reproducing Results
 
-Given a correctly configured Python environment, with all dependencies, one can reproduce our results by cloning this repository, and running either of the following in a command line at the root directory, for synthetic and real-world networks, respectively:
+Given a correctly configured Python environment, with all dependencies, one can reproduce our main results by cloning this repository, and running the following in a command line at the root directory:
 
 ``python experiments.py {TRACE CODE} {AMOUNT OF SLACK}``
 
